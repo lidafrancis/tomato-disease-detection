@@ -1,0 +1,13 @@
+td/
+tomato_data/
+archive.zip
+*.pth
+__pycache__/
+*.pyc
+.venv/
+*.png
+db.sqlite3
+.idea/
+*.jpg
+*.JPG
+*.jpeg
