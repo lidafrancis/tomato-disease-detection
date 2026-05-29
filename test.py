@@ -4,14 +4,14 @@ import torch.nn.functional as F
 from torchvision import transforms
 from PIL import Image
 from pathlib import Path
-from model import TomatoCNN
+from model import build_model
 
 DEVICE     = "cuda" if torch.cuda.is_available() else "cpu"
 MODEL_PATH = "best_model.pth"
 
 checkpoint  = torch.load(MODEL_PATH, map_location=DEVICE)
 CLASS_NAMES = checkpoint['class_names']
-model       = TomatoCNN(num_classes=len(CLASS_NAMES)).to(DEVICE)
+model = build_model(num_classes=len(CLASS_NAMES)).to(DEVICE)
 model.load_state_dict(checkpoint['model_state_dict'])
 model.eval()
 

@@ -9,7 +9,7 @@ TRAIN_DIR = "td/tomato/train"
 VAL_DIR   = "td/tomato/val"
 
 # 64x64 — better detail than 32x32, still fast on CPU
-IMG_SIZE = 64
+IMG_SIZE = 224
 
 CLASS_NAMES  = sorted([
     d.name for d in Path(TRAIN_DIR).iterdir() if d.is_dir()

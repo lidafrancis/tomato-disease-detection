@@ -3,9 +3,8 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 from dataset_loader import train_loader, val_loader, CLASS_NAMES
-from model import TomatoCNN
+from model import build_model
 
-# ---- Hyperparameters ----
 EPOCHS    = 10
 LR        = 0.001
 PATIENCE  = 5
@@ -17,24 +16,19 @@ print(f"  Device        : {DEVICE}")
 print(f"  Epochs        : {EPOCHS}")
 print(f"  Learning rate : {LR}")
 print(f"  Batch size    : 64")
-print(f"  Image size    : 64x64")
+print(f"  Image size    : 224x224")
 print(f"  Classes       : {len(CLASS_NAMES)} — {CLASS_NAMES}")
 print("=" * 50)
 
-model     = TomatoCNN(num_classes=len(CLASS_NAMES)).to(DEVICE)
-# Force model to pay extra attention to healthy class
-# Index order is alphabetical: Early_blight=0, Late_blight=1, healthy=2
-# Check your class order first with the print below
-print(f"Class order: {CLASS_NAMES}")
+model = build_model(num_classes=len(CLASS_NAMES)).to(DEVICE)
 
-class_weights = torch.ones(len(CLASS_NAMES)).to(DEVICE)
-healthy_idx = CLASS_NAMES.index("Tomato___healthy")
-class_weights[healthy_idx] = 3.0  # 3x penalty for wrong healthy prediction
+criterion = nn.CrossEntropyLoss()
 
-criterion = nn.CrossEntropyLoss(weight=class_weights)
+# Only train the final fc layer — clean and simple
 optimizer = torch.optim.Adam(
-    model.parameters(), lr=LR, weight_decay=1e-4
+    model.fc.parameters(), lr=LR, weight_decay=1e-4
 )
+
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer, mode='min', factor=0.5, patience=3
 )
@@ -83,7 +77,6 @@ def validate():
     return total_loss / len(val_loader), correct / total * 100
 
 
-# ---- Training loop ----
 train_losses, val_losses = [], []
 train_accs,   val_accs   = [], []
 best_val_loss = float('inf')
@@ -130,7 +123,6 @@ for epoch in range(1, EPOCHS + 1):
         print(f"\nEarly stopping at epoch {epoch}.")
         break
 
-# ---- Graphs ----
 epochs_ran = range(1, len(train_losses) + 1)
 fig, axes  = plt.subplots(1, 2, figsize=(14, 5))
 
@@ -155,11 +147,11 @@ axes[1].set_title("Accuracy Curve", fontweight='bold')
 axes[1].legend(); axes[1].grid(True, alpha=0.3)
 axes[1].set_ylim(0, 100)
 
-plt.suptitle("Tomato 3-Class CNN — Training Results",
+plt.suptitle("Tomato 3-Class ResNet18 — Training Results",
              fontsize=14, fontweight='bold', y=1.02)
 plt.tight_layout()
 plt.savefig("loss_curve.png", dpi=150, bbox_inches='tight')
-plt.show()
+plt.close()
 
 print(f"\n{'='*50}")
 print(f"  Training Complete!")

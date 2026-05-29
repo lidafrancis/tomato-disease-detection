@@ -1,19 +1,20 @@
+# check_accuracy.py
 import torch
 import torch.nn.functional as F
 from torchvision import transforms
 from PIL import Image
 from pathlib import Path
-from model import TomatoCNN
+from model import build_model
 
 DEVICE = 'cpu'
 checkpoint = torch.load('best_model.pth', map_location=DEVICE)
 CLASS_NAMES = checkpoint['class_names']
-model = TomatoCNN(num_classes=len(CLASS_NAMES))
+model = build_model(num_classes=len(CLASS_NAMES))
 model.load_state_dict(checkpoint['model_state_dict'])
 model.eval()
 
 transform = transforms.Compose([
-    transforms.Resize((64, 64)),
+    transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
 ])
